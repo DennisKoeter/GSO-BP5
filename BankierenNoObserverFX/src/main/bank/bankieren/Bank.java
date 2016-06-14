@@ -16,13 +16,13 @@ public class Bank implements IBank {
 	private String name;
 
 	public Bank(String name) {
-		accounts = new HashMap<Integer,IRekeningTbvBank>();
-		clients = new ArrayList<IKlant>();
+		accounts = new HashMap<>();
+		clients = new ArrayList<>();
 		nieuwReknr = 100000000;	
 		this.name = name;	
 	}
 
-	public int openRekening(String name, String city) {
+	public synchronized int openRekening(String name, String city) {
 		if (name.equals("") || city.equals(""))
 			return -1;
 
@@ -47,7 +47,7 @@ public class Bank implements IBank {
 		return accounts.get(nr);
 	}
 
-	public boolean maakOver(int source, int destination, Geld geld)
+	public synchronized boolean maakOver(int source, int destination, Geld geld)
 			throws NumberDoesntExistException {
 		if (source == destination)
 			throw new RuntimeException(

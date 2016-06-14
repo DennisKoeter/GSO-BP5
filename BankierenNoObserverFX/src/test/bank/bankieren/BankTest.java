@@ -111,11 +111,12 @@ public class BankTest {
         int bronTooMuch = bank.openRekening("4", "4");
         int bestemmingTooMuch = bank.openRekening("5", "5");
         bedrag = new Geld(10001, Geld.EURO);
-        assertFalse("maakOver too mach succeeded incorrectly", bank.maakOver(bronTooMuch, bestemmingTooMuch, bedrag));
+        assertFalse("maakOver too much succeeded incorrectly", bank.maakOver(bronTooMuch, bestemmingTooMuch, bedrag));
 
         //Number must be higher than 0
         int bronNegatiefBedrag = bank.openRekening("4", "4");
         int bestemmingNegatiefBedrag = bank.openRekening("5", "5");
+
         bedrag = new Geld(0, Geld.EURO);
         try {
             bank.maakOver(bronNegatiefBedrag, bestemmingNegatiefBedrag, bedrag);
