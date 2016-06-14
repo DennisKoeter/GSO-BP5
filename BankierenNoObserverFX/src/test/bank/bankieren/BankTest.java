@@ -1,28 +1,31 @@
 package bank.bankieren;
 
+import fontys.util.NumberDoesntExistException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 /**
  * Created by Dennis on 14/06/16
  * Package: bank.bankieren
  */
 public class BankTest {
-    String henkNaam;
-    String henkPlaats;
-    Klant henk;
-    IBank bank;
+    private static final String HENK_NAAM = "Henk";
+    private static final String HENK_PLAATS = "Eindhoven";
+    private static final String BANK_NAAM = "testBank";
+
+    public static final String PIET_NAAM = "Piet";
+    public static final String PIET_PLAATS = "Veldhoven";
+
+    private Klant henk;
+    private IBank bank;
     //test
 
     @Before
     public void setUp() throws Exception {
-        henkNaam = "Henk";
-        henkPlaats = "Eindhoven";
-        henk = new Klant(henkNaam, henkPlaats);
-        bank = new Bank("testBank");
+        henk = new Klant(HENK_NAAM, HENK_PLAATS);
+        bank = new Bank(BANK_NAAM);
     }
 
     @Test
@@ -33,8 +36,8 @@ public class BankTest {
 
         int henkRekening = 0;
         int pietRekening = 0;
-        henkRekening = bank.openRekening(henkNaam, henkPlaats);
-        pietRekening = bank.openRekening("Piet", "Veldhoven");
+        henkRekening = bank.openRekening(HENK_NAAM, HENK_PLAATS);
+        pietRekening = bank.openRekening(PIET_NAAM, PIET_PLAATS);
 
         assertNotEquals("henkRekening not created correctly", henkRekening, 0); //in case method did nothing
         assertNotEquals("henkRekening not created correctly", henkRekening, -1); //in case method went wrong
@@ -43,7 +46,7 @@ public class BankTest {
     }
 
     @Test
-    public void testOpenRekeningEmptyString() throws Exception{
+    public void testOpenRekeningEmptyString() throws Exception {
         //@return -1 zodra naam of plaats een lege string en anders het nummer van de
         //        gecreeerde bankrekening
 
@@ -65,16 +68,80 @@ public class BankTest {
 
     @Test
     public void testMaakOver() throws Exception {
+        /**
+         * er wordt bedrag overgemaakt van de bankrekening met nummer bron naar de
+         * bankrekening met nummer bestemming, mits het afschrijven van het bedrag
+         * van de rekening met nr bron niet lager wordt dan de kredietlimiet van deze
+         * rekening
+         *
+         * @param bron
+         * @param bestemming
+         *            ongelijk aan bron
+         * @param bedrag
+         *            is groter dan 0
+         * @return <b>true</b> als de overmaking is gelukt, anders <b>false</b>
+         * @throws NumberDoesntExistException
+         *             als een van de twee bankrekeningnummers onbekend is
+         */
+        Geld bedrag = new Geld(9999, Geld.EURO);
 
+        //Happy Flow
+        int bronHappy = bank.openRekening("1", "1");
+        int bestemmingHappy = bank.openRekening("2", "2");
+        assertTrue("maakOver happy flow did not succeed", bank.maakOver(bronHappy, bestemmingHappy, bedrag));
+
+        //Exception
+        try {
+            bank.maakOver(9, 9, bedrag);
+            fail("exception should have been thrown");
+        } catch (NumberDoesntExistException e) {
+            //this is supposed to happen
+        }
+
+        //Destination and Source identical
+        int account = bank.openRekening("3", "3");
+        assertFalse("money transferred to source", bank.maakOver(account, account, bedrag));
+
+        //Too Much
+        int bronTooMuch = bank.openRekening("4", "4");
+        int bestemmingTooMuch = bank.openRekening("5", "5");
+        bedrag = new Geld(10001, Geld.EURO);
+        assertFalse("maakOver too mach succeeded incorrectly", bank.maakOver(bronTooMuch, bestemmingTooMuch, bedrag));
+
+        //Number must be higher than 0
+        int bronNegatiefBedrag = bank.openRekening("4", "4");
+        int bestemmingNegatiefBedrag = bank.openRekening("5", "5");
+        bedrag = new Geld(0, Geld.EURO);
+        assertFalse("Bedrag must exceed 0", bank.maakOver(bronNegatiefBedrag, bestemmingNegatiefBedrag, bedrag));
+        bedrag = new Geld(-1, Geld.EURO);
+        assertFalse("Bedrag must exceed 0", bank.maakOver(bronNegatiefBedrag, bestemmingNegatiefBedrag, bedrag));
+
+        //Bestemming moet ongelijk zijn aan bron
+        int bron = bank.openRekening("7", "7");
+        bedrag = new Geld(10, Geld.EURO);
+        assertFalse("Bron nummer moet uniek zijn aan bestemming", bank.maakOver(bron, bron, bedrag));
     }
 
     @Test
     public void testGetRekening() throws Exception {
+        /**
+         * @param nr
+         * @return de bankrekening met nummer nr mits bij deze bank bekend, anders null
+         */
 
+        //creating an account and getting it
+        int rekeningNummer = bank.openRekening(HENK_NAAM, HENK_PLAATS);
+        assertNotNull("Bank should have returned a valid rekening", bank.getRekening(rekeningNummer));
+
+        //trying to get a non-existent account
+        assertNull("Bank should not have returned a valid rekening", bank.getRekening(100994));
     }
 
     @Test
     public void testGetName() throws Exception {
-
+        /**
+         * @return de naam van deze bank
+         */
+        assertEquals("Bank naam was not gelijk while it should be", BANK_NAAM, bank.getName());
     }
 }
