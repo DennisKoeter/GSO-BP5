@@ -1,16 +1,17 @@
 package bank.internettoegang;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-
 import bank.bankieren.Geld;
 import bank.bankieren.IRekening;
 import fontys.util.InvalidSessionException;
 import fontys.util.NumberDoesntExistException;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
 public interface IBankiersessie extends Remote {
-	
-	long GELDIGHEIDSDUUR = 600000; 
+
+	// todo: set this back to 600000 after testing
+	long GELDIGHEIDSDUUR = 1000;
 	/**
 	 * @returns true als de laatste aanroep van getRekening of maakOver voor deze
 	 *          sessie minder dan GELDIGHEIDSDUUR geleden is
@@ -23,7 +24,6 @@ public interface IBankiersessie extends Remote {
 	 * er wordt bedrag overgemaakt van de bankrekening met het nummer bron naar
 	 * de bankrekening met nummer bestemming
 	 * 
-	 * @param bron
 	 * @param bestemming
 	 *            is ongelijk aan rekeningnummer van deze bankiersessie
 	 * @param bedrag

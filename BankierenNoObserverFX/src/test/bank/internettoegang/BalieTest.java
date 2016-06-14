@@ -7,9 +7,7 @@ import org.junit.Test;
 
 import java.rmi.RemoteException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Edwin
@@ -56,7 +54,6 @@ public class BalieTest {
         String accountNaam = balie.openRekening(HENK_NAAM, HENK_PLAATS, HENK_WACHTWOORD);
         // Sessie van henk
         IBankiersessie sessie = balie.logIn(accountNaam, HENK_WACHTWOORD);
-        ;
         // Daadwerkelijke rekening
         IRekening nieuweRekening = sessie.getRekening();
         // Geld die initieel op de rekening staat
