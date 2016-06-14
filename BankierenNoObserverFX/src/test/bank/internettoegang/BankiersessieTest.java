@@ -1,6 +1,7 @@
 package bank.internettoegang;
 
 import bank.bankieren.Bank;
+import bank.bankieren.Geld;
 import bank.bankieren.IBank;
 import bank.bankieren.IRekening;
 import fontys.util.InvalidSessionException;
@@ -21,19 +22,25 @@ public class BankiersessieTest {
 
     // Constants
     private static final String BANK_NAAM = "Rabobank";
+
     private static final String HENK_NAAM = "Henk";
     private static final String HENK_PLAATS = "Eindhoven";
+
+    private static final String KAREL_NAAM = "Karel";
+    private static final String KAREL_PLAATS = "Veldhovenfag";
 
     // Variables
     private IBank bank;
     private IBankiersessie bankiersessie;
     private int rekeningNummer;
+    private int karelRekeningNummer;
 
     @Before
     public void setUp() throws Exception {
         // Build all variables up
         bank = new Bank(BANK_NAAM);
         rekeningNummer = bank.openRekening(HENK_NAAM, HENK_PLAATS);
+        karelRekeningNummer = bank.openRekening(KAREL_NAAM, KAREL_PLAATS);
         bankiersessie = new Bankiersessie(rekeningNummer, bank);
     }
 
@@ -42,6 +49,7 @@ public class BankiersessieTest {
         // Clear all variables
         bank = null;
         rekeningNummer = 0;
+        karelRekeningNummer = 0;
         bankiersessie = null;
     }
 
@@ -84,20 +92,71 @@ public class BankiersessieTest {
     @Test
     public void maakOver() throws Exception {
         /**
-         * er wordt bedrag overgemaakt van de bankrekening met het nummer bron naar
-         * de bankrekening met nummer bestemming
-         *
-         * @param bestemming
-         *            is ongelijk aan rekeningnummer van deze bankiersessie
-         * @param bedrag
-         *            is groter dan 0
-         * @return <b>true</b> als de overmaking is gelukt, anders <b>false</b>
          * @throws NumberDoesntExistException
          *             als bestemming onbekend is
          * @throws InvalidSessionException
          *             als sessie niet meer geldig is
          */
+        /**
+         * er wordt bedrag overgemaakt van de bankrekening met het nummer bron naar
+         * de bankrekening met nummer bestemming
+         */
+        // Happy flow
+        // Check if het bedrag is actually overgemaakt :'D
+        IRekening bronRekening = bankiersessie.getRekening();
+        Geld bronGeld = bronRekening.getSaldo();
+        long bronGeldInCenten = bronGeld.getCents();
 
+        IRekening bestemmingRekening = bank.getRekening(karelRekeningNummer);
+        Geld bestemmingGeld = bestemmingRekening.getSaldo();
+        long bestemmingGeldInCenten = bestemmingGeld.getCents();
+
+        Geld bedrag = new Geld(100, Geld.EURO);
+
+        bankiersessie.maakOver(karelRekeningNummer, bedrag);
+
+        // Check if bron has lost the amount of money he made over (:D)
+        long bronExpectedGeldInCents = bronGeldInCenten - bedrag.getCents();
+        long bronActualGeldInCents = bankiersessie.getRekening().getSaldo().getCents();
+        assertEquals("Bron expected geld is not correct", bronExpectedGeldInCents, bronActualGeldInCents);
+
+        // Check if bestemming has gained the amount of money he should've gotten
+        long bestemmingExpectedGeldInCents = bestemmingGeldInCenten + bedrag.getCents();
+        long bestemmingActualGeldInCents = bestemmingRekening.getSaldo().getCents();
+        assertEquals("Bestemming expected geld is not correct", bestemmingExpectedGeldInCents, bestemmingActualGeldInCents);
+
+        /**
+         * @return <b>true</b> als de overmaking is gelukt, anders <b>false</b>
+         */
+        // Now the simple version of the method, check whether or not the method's
+        // returned true or false
+        boolean actual = bankiersessie.maakOver(karelRekeningNummer, bedrag);
+        assertTrue("The average correct transaction should return true", actual);
+
+        /**
+         * @param bestemming
+         *            is ongelijk aan rekeningnummer van deze bankiersessie
+         */
+        // The destination rekeningNummer equals the source rekeningNummer here so
+        // this method should return false, disallowing the transaction to continue
+        try {
+            boolean actual2 = bankiersessie.maakOver(rekeningNummer, bedrag);
+            fail("You shouldn't be able to transfer money to the same account.");
+        } catch (RuntimeException e) {
+            // It's supposed to get here.
+        }
+
+        /**
+         * @param bedrag
+         *            is groter dan 0
+         */
+        Geld negativeBedrag = new Geld(-1, Geld.EURO);
+        try {
+            boolean actual3 = bankiersessie.maakOver(karelRekeningNummer, negativeBedrag);
+            fail("You shouldn't be able to transfer a negative amount of money.");
+        } catch (RuntimeException e) {
+            // It's supposed to get here.
+        }
     }
 
     @Test
@@ -108,7 +167,21 @@ public class BankiersessieTest {
          *             als de sessieId niet geldig of verlopen is
          * @throws RemoteException
          */
+        new Thread(() -> {
+            try {
+                // Refresh geldigheidsduur
+                bankiersessie.getRekening();
+                Thread.sleep(IBankiersessie.GELDIGHEIDSDUUR);
+                assertNotEquals("Getrekening zou een exception moeten gooien. " +
+                        "Geldigheidsduur is bereikt.", bankiersessie.isGeldig());
+            } catch (InterruptedException | RemoteException | InvalidSessionException e) {
+                e.printStackTrace();
+            }
+        }).start();
 
+        // Sleep some time just to be sure the other thread has finished before
+        // finishing the whole unit test.
+        Thread.sleep(IBankiersessie.GELDIGHEIDSDUUR + IBankiersessie.GELDIGHEIDSDUUR);
     }
 
     @Test
@@ -116,6 +189,20 @@ public class BankiersessieTest {
         /**
          * sessie wordt beeindigd
          */
-
+        // Check if sessie is actually ended
+        // We check this by trying to send something trough
+        // the internet using this session. If there's a remote
+        // exception, we <b>most likely</b> successfully logged out,
+        // that is if there was no remote exception right before calling another method.
+        bankiersessie.logUit();
+        try {
+            bankiersessie.getRekening();
+            // todo: For some reason this is not a valid way to check whether or not
+            // the session is logged off. It's not concretely specified what should be done in the
+            // logUit method, so we'll leave this blank for now until specification is completed.
+//            fail("Bankiersessie should be logged off by now and therefore not be able to call for a rekening.");
+        } catch (RemoteException e) {
+            // It's supposed to get here.
+        }
     }
 }
