@@ -3,9 +3,8 @@ package bank.bankieren;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.IllegalFormatException;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Created by Dennis on 14/06/16
@@ -16,6 +15,7 @@ public class BankTest {
     String henkPlaats;
     Klant henk;
     IBank bank;
+    //test
 
     @Before
     public void setUp() throws Exception {
