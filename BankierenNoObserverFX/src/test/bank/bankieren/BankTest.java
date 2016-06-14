@@ -56,7 +56,7 @@ public class BankTest {
 
         emptyNaam = bank.openRekening("", "test");
         emptyPlaats = bank.openRekening("test", "");
-        emptyEverything = bank.openRekening("test", "test");
+        emptyEverything = bank.openRekening("", "");
 
         assertNotEquals("emptyNaam not caught", emptyNaam, 0); //in case method did nothing
         assertEquals("emptyNaam not caught", emptyNaam, -1); // method should return -1
@@ -92,7 +92,7 @@ public class BankTest {
 
         //Exception
         try {
-            bank.maakOver(9, 9, bedrag);
+            bank.maakOver(9, 10, bedrag);
             fail("exception should have been thrown");
         } catch (NumberDoesntExistException e) {
             //this is supposed to happen
@@ -100,7 +100,12 @@ public class BankTest {
 
         //Destination and Source identical
         int account = bank.openRekening("3", "3");
-        assertFalse("money transferred to source", bank.maakOver(account, account, bedrag));
+        try {
+            bank.maakOver(account, account, bedrag);
+            fail("exception should have been thrown");
+        } catch (RuntimeException e) {
+            //this is supposed to happen
+        }
 
         //Too Much
         int bronTooMuch = bank.openRekening("4", "4");
@@ -112,14 +117,29 @@ public class BankTest {
         int bronNegatiefBedrag = bank.openRekening("4", "4");
         int bestemmingNegatiefBedrag = bank.openRekening("5", "5");
         bedrag = new Geld(0, Geld.EURO);
-        assertFalse("Bedrag must exceed 0", bank.maakOver(bronNegatiefBedrag, bestemmingNegatiefBedrag, bedrag));
+        try {
+            bank.maakOver(bronNegatiefBedrag, bestemmingNegatiefBedrag, bedrag);
+            fail("exception should have been thrown");
+        } catch (RuntimeException e) {
+            //this is supposed to happen
+        }
         bedrag = new Geld(-1, Geld.EURO);
-        assertFalse("Bedrag must exceed 0", bank.maakOver(bronNegatiefBedrag, bestemmingNegatiefBedrag, bedrag));
+        try {
+            bank.maakOver(bronNegatiefBedrag, bestemmingNegatiefBedrag, bedrag);
+            fail("exception should have been thrown");
+        } catch (RuntimeException e) {
+            //this is supposed to happen
+        }
 
         //Bestemming moet ongelijk zijn aan bron
         int bron = bank.openRekening("7", "7");
         bedrag = new Geld(10, Geld.EURO);
-        assertFalse("Bron nummer moet uniek zijn aan bestemming", bank.maakOver(bron, bron, bedrag));
+        try {
+            bank.maakOver(bron, bron, bedrag);
+            fail("exception should have been thrown");
+        } catch (RuntimeException e) {
+            //this is supposed to happen
+        }
     }
 
     @Test
