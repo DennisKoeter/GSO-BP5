@@ -1,9 +1,11 @@
 package bank.internettoegang;
 
-import java.rmi.*;
+import bank.bankieren.IBank;
+
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.*;
-import bank.bankieren.*;
+import java.util.HashMap;
+import java.util.Random;
 
 public class Balie extends UnicastRemoteObject implements IBalie {
 
@@ -15,18 +17,18 @@ public class Balie extends UnicastRemoteObject implements IBalie {
 
 	public Balie(IBank bank) throws RemoteException {
 		this.bank = bank;
-		loginaccounts = new HashMap<String, ILoginAccount>();
+		loginaccounts = new HashMap<>();
 		//sessions = new HashSet<IBankiersessie>();
 		random = new Random();
 	}
 
 	public String openRekening(String naam, String plaats, String wachtwoord) {
-		if (naam.equals(""))
+		if (naam == null || naam.equals(""))
 			return null;
-		if (plaats.equals(""))
+		if (plaats == null || plaats.equals(""))
 			return null;
 
-		if (wachtwoord.length() < 4 || wachtwoord.length() > 8)
+		if (wachtwoord == null || wachtwoord.length() < 4 || wachtwoord.length() > 8)
 			return null;
 
 		int nr = bank.openRekening(naam, plaats);
