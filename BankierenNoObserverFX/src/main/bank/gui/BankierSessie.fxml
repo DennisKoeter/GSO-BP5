@@ -14,7 +14,6 @@
         <URL value="@bankiersessie.css" />
     </stylesheets>
    <children>
-      <Hyperlink fx:id="hlLogout" onAction="#logout" text="Uitloggen" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="40.0" />
       <AnchorPane prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
          <children>
             <VBox layoutX="40.0" prefHeight="223.0" prefWidth="520.0" spacing="15.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" AnchorPane.topAnchor="0.0">
@@ -61,12 +60,12 @@
                               <Font size="20.0" />
                            </font>
                         </Label>
-                        <Label prefHeight="30.0" prefWidth="44.0" text="Bedrag" GridPane.rowIndex="1">
+                        <Label prefHeight="31.0" prefWidth="172.0" text="Bedrag" GridPane.rowIndex="1">
                            <padding>
                               <Insets top="10.0" />
                            </padding>
                         </Label>
-                        <Label text="Tegenrekening" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label prefHeight="31.0" prefWidth="192.0" text="Tegenrekening" GridPane.columnIndex="1" GridPane.rowIndex="1">
                            <padding>
                               <Insets top="10.0" />
                            </padding>
@@ -90,5 +89,6 @@
             <TextArea fx:id="taMessage" layoutX="29.0" layoutY="288.0" prefHeight="73.0" prefWidth="4689.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="40.0" AnchorPane.rightAnchor="40.0" />
          </children>
       </VBox>
+      <Button fx:id="btnLoguit" layoutX="497.0" layoutY="19.0" mnemonicParsing="false" onAction="#logout" text="loguit" />
    </children>
 </AnchorPane>

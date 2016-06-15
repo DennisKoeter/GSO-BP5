@@ -6,17 +6,17 @@
 package bank.gui;
 
 import bank.internettoegang.IBalie;
-import bank.internettoegang.IBankiersessie;
-import java.net.URL;
-import java.rmi.RemoteException;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * FXML Controller class
@@ -58,6 +58,7 @@ public class OpenRekeningController  implements Initializable {
             String accountNaam;
             accountNaam = balie.openRekening(tfName.getText(), tfCity.getText(), tfPassWord.getText());
             if (accountNaam == null) {
+                System.out.println("accountnaam is null");
                 return;
             }
             System.out.println("account:"+accountNaam);
